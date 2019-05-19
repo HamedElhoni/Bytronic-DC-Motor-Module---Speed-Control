@@ -31,9 +31,10 @@ String SerialReciveData = "";             //Recived Data via SerialEvent
 long setpoint = 0;                        //Setpoint for System
 volatile unsigned long counterValue = 0, FeedBack = 0;   //Counter for ENC signal
 volatile unsigned int Op_time =0, sampleTime =0;
-unsigned int FeedBack_RPM;
+volatile unsigned int FeedBack_RPM;
+bool FeedbackEnable = true;
 int Drive_Signal;
-double Ierror=0.0, Error=0.0,PrevError=0.0,Derror=0.0,Ki=1.5,Kp=1.0,Kd=0.05;               //PID parameter
+double Ierror=0.0, Error=0.0,PrevError=0.0,Derror=0.0,Ki=0,Kp=1,Kd=0;               //PID parameter
 //void NewSample(void);
 
 //This ISR of external interrupt attached to pin 2 comes from SYNC 
@@ -64,26 +65,6 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  while(SYNC_enable_flag){
-    SYNC_enable_flag = false;
-    Error = setpoint - FeedBack_RPM;
-    Ierror += Error*0.1;
-    Derror = (Error - PrevError)/0.1;
-    Drive_Signal = Error*Kp + Ierror*Ki + Derror*Kd;
-    // if(setpoint == 0){
-    //   Error=0;
-    //   Ierror=0;
-    //   Derror=0;
-    //   Drive_Signal =0;
-    // }
-  }
-  if (setpoint >= 0) {
-    digitalWrite(DIR, LOW);
-  } 
-  else {
-    digitalWrite(DIR, HIGH);
-  }
-
   while (SerialRecivedFlag) {
     SerialRecivedFlag = false;
     //Serial.println(SerialReciveData);
@@ -92,7 +73,16 @@ void loop() {
     SerialReciveData = "";
     //Serial.println(setpoint);
   }
-
+  if (setpoint >= 0) {
+    digitalWrite(DIR, LOW);
+  } 
+  else {
+    digitalWrite(DIR, HIGH);
+  }
+  Error = setpoint - FeedBack_RPM*FeedbackEnable;
+  Ierror += Error*0.1;
+  Derror = (Error - PrevError)/0.1;
+  Drive_Signal = Error*Kp + Ierror*Ki + Derror*Kd;
   //if(Error < 0) Error = 0;  // Error < 0 that mean feedback > setpoint .. Action = motor stop
   if (Drive_Signal > 255){
     Drive_Signal = 255;    // to a void over load
@@ -100,25 +90,29 @@ void loop() {
   if(Drive_Signal <= 0){
     Drive_Signal = 0;
   }
-  
   analogWrite(PULSE, 255 - Drive_Signal); //PULSE pin -> PIN 5
-  if(FeedBack != 0){
+  while(SYNC_enable_flag){
+    SYNC_enable_flag = false;
+    if(FeedBack != 0){
       //Serial.println(FeedBack);
-        Serial.print("Setpoint= ");
+        //Serial.print("Setpoint= ");
+        Serial.print(millis());
+        Serial.print("\t");
         Serial.print(setpoint);
         //Serial.print("\tFeedBack= ");
         //Serial.print(FeedBack);
-        Serial.print("\tFeedBack_RPM= ");
+        Serial.print("\t");
         Serial.print(FeedBack_RPM);
-        Serial.print("\tError= ");
+        Serial.print("\t");
         Serial.print(Error);
-        Serial.print("\tIerror= ");
+        Serial.print("\t");
         Serial.print(Ierror);
-        Serial.print("\tDerror= ");
+        Serial.print("\t");
         Serial.print(Derror);
-        Serial.print("\tDrive_Signal= ");
+        Serial.print("\t");
         Serial.println(Drive_Signal);
     }
+  }
 }
 
 void serialEvent() {

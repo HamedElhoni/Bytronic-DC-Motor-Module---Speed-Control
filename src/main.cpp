@@ -47,10 +47,11 @@ void NewSample(){
     noInterrupts();
     SYNC_enable_flag = true;
     FeedBack = counterValue;
-    FeedBack_RPM =FeedBack*6; //Calculate Feedback as RPM (Round per Minute)
+    FeedBack_RPM = FeedBack * 6; //Calculate Feedback as RPM (Round per Minute)
     Error = setpoint - FeedBack_RPM*FeedbackEnable;
     Ierror += Error*0.1;
     Derror = (Error - PrevError)/0.1;
+    PrevError = Error;
     Drive_Signal = Error*Kp + Ierror*Ki + Derror*Kd;
     counterValue=0;
     sampleTime = 0;
@@ -107,7 +108,6 @@ void loop() {
         FeedbackEnable=true;
         Sys_mode="Close Loop";
       }
-      Serial.println(FeedbackEnable);
     }else if(SerialReciveData.startsWith("on")){  // Run the system
       startFlag = true;
     }else if(SerialReciveData.startsWith("off")){ // Stop the system

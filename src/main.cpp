@@ -42,12 +42,12 @@ bool startFlag= false;
 //This ISR of external interrupt attached to pin 2 comes from SYNC 
 void NewSample(){
   sampleTime++;
-  if(sampleTime >= 10){
+  if(sampleTime >= 5){
     //Serial.println(Feedback);
     noInterrupts();
     SYNC_enable_flag = true;
     FeedBack = counterValue;
-    FeedBack_RPM = FeedBack * 6; //Calculate Feedback as RPM (Round per Minute)
+    FeedBack_RPM = FeedBack * 12; //Calculate Feedback as RPM (Round per Minute)
     Error = setpoint - FeedBack_RPM*FeedbackEnable;
     Ierror += Error*0.1;
     Derror = (Error - PrevError)/0.1;
@@ -139,7 +139,7 @@ void loop() {
     if(startFlag){
       //Serial.println(FeedBack);
         //Serial.print("Setpoint= ");
-        Serial.print(Op_time++/10.0);
+        Serial.print(Op_time++/20.0);
         Serial.print(",");
         Serial.print(setpoint);
         //Serial.print("\tFeedBack= ");

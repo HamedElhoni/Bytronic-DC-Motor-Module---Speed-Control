@@ -28,7 +28,7 @@ volatile bool SYNC_enable_flag = false;   //SYNC rising Interrupt Flag
 volatile bool SerialRecivedFlag = false;  //SerialEvent call Flag
 volatile bool ENC_enable_flag = false;    //encrimental encoder Flag
 String SerialReciveData = "";             //Recived Data via SerialEvent
-String Sys_mode = "";                     //to define the close loop or openloop system
+String Sys_mode = "Close Loop";                     //to define the close loop or openloop system
 long setpoint = 0;                        //Setpoint for System
 volatile unsigned long counterValue = 0, FeedBack = 0;   //Counter for ENC signal
 volatile unsigned int Op_time =0, sampleTime =0;  //time in millisecond
@@ -80,7 +80,6 @@ void loop() {
       SerialReciveData.remove(0,3);
       setpoint = SerialReciveData.toInt();
     } else if(SerialReciveData.startsWith("kp")){ //set new Kp
-      Serial.println(SerialReciveData);
       SerialReciveData.remove(0,2);
       Kp=SerialReciveData.toFloat();
     }else if(SerialReciveData.startsWith("ki")){  //set new Ki
@@ -93,11 +92,11 @@ void loop() {
       Serial.print("Setpoint= ");
       Serial.print(setpoint);
       Serial.print("\tKp= ");
-      Serial.print(Kp);
+      Serial.print(Kp,4);
       Serial.print("\tKi= ");
-      Serial.print(Ki);
+      Serial.print(Ki,4);
       Serial.print("\tKd= ");
-      Serial.print(Kd);
+      Serial.print(Kd,4);
       Serial.print("\tMode= ");
       Serial.println(Sys_mode);
     }else if(SerialReciveData.startsWith("m")){ // toggle operation mode Close/Open loop

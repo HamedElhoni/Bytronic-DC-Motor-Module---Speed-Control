@@ -49,8 +49,8 @@ void NewSample(){
     FeedBack = counterValue;
     FeedBack_RPM = FeedBack * 12; //Calculate Feedback as RPM (Round per Minute)
     Error = setpoint - FeedBack_RPM*FeedbackEnable;
-    Ierror += Error*0.1;
-    Derror = (Error - PrevError)/0.1;
+    Ierror += Error*0.05;
+    Derror = (Error - PrevError)/0.05;
     PrevError = Error;
     Drive_Signal = Error*Kp + Ierror*Ki + Derror*Kd;
     counterValue=0;
@@ -126,8 +126,8 @@ void loop() {
     digitalWrite(DIR, HIGH);
   }
   //if(Error < 0) Error = 0;  // Error < 0 that mean feedback > setpoint .. Action = motor stop
-  if (Drive_Signal > 255){
-    Drive_Signal = 255;    // to a void over load
+  if (Drive_Signal >= 250){
+    Drive_Signal = 249;    // to a void over load
   }
   if(Drive_Signal <= 0){
     Drive_Signal = 0;
